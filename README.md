@@ -84,6 +84,7 @@
   
 ## 6. 건물정보 데이터 전처리
 #### [건물정보 데이터 결측치 비율]
-- ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/5cf843f2-a6cd-4794-b1d2-db34555dcf26)
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/aac0b9d9-9d06-4551-afa3-a58176ce3b80)
+
 
 #### [태양광용량 전처리리

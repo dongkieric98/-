@@ -257,8 +257,9 @@ test.drop(['ESS저장용량(kWh)', 'PCS용량(kW)', '강수량(mm)'], axis=1, in
 
 ## 9. 평가지표 생성 - SMAPE
 - 공모전에서 평가 기준이 SMAPE 값이기에 해당 값을 생성
+
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/443db9b8-7ba0-4821-bca9-787082c5c78c)
 
-
+- 
 
 

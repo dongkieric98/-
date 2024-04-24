@@ -116,7 +116,7 @@ building['냉방면적(m2)'][67] = building['연면적(m2)'][67]/1.27
 
 ## 7. 학습 데이터(train) 전처리
 
-#### [날짜 데이터(년,월,일,시) 추가 및 평일/휴일 컬럼 추가]
+#### [년/월/일/시, 휴일 Feature 생성]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/24a428ae-8388-4434-8a6d-07cfeddedf1c)
 - 기존의 날짜 정보로 부족하다는 생각이 들어 년/월/일/시로 분리
 - 평일과 휴일간의 전력사용량 차이가 클 것이라고 예상하여 휴일 변수 추가
@@ -138,4 +138,13 @@ train['월'] = train['일시'].dt.month
 train['일'] = train['일시'].dt.day
 train['시'] = train['일시'].dt.hour
 train.drop(['num_date_time', '일시', '년'], axis=1, inplace=True)
+```
+
+#### [sin time, cos time Feature 생성]
+- 기존의 데이터로 시간의 주기성을 파악하기 어려움
+- 시간의 주기성을 반영하는 sin time과 cos time을 추가
+```
+# 시간 데이터 표준화 - 시간의 주기성을 반영하기 위해 사용
+train['sin_time'] = np.sin(2*np.pi*train['시']/24)
+train['cos_time'] = np.cos(2*np.pi*train['시']/24)
 ```

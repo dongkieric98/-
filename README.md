@@ -88,13 +88,17 @@
 
 #### [태양광용량, ESS저장용량, PCS저장용량 전처리]
 - 해당 결측치 값이 -로 되어있고 데이터 타입도 object여서 '-'값으 0으로 바꾸고 데이터 타입을 float64로 변경
-'''
+
+```
+# 태양광이 없는 곳이므로 0값처리
 building['태양광용량(kW)'] = building['태양광용량(kW)'].replace('-', 0)
 building['태양광용량(kW)'] = building['태양광용량(kW)'].astype('float64')
+
+# 대부분 결측치이고, 해당 기능이 없는 것이므로 0값처리
 building['ESS저장용량(kWh)'] = building['ESS저장용량(kWh)'].replace('-', 0)
 building['ESS저장용량(kWh)'] = building['ESS저장용량(kWh)'].astype('float64')
 building['PCS용량(kW)'] = building['PCS용량(kW)'].replace('-', 0)
 building['PCS용량(kW)'] = building['PCS용량(kW)'].astype('float64')
-'''  
+```
 
 #### [냉방면적 결측치 처리]

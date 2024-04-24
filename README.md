@@ -82,7 +82,7 @@
 
   <br/></br>
   
-## 6. 건물정보 데이터 전처리
+## 6. 건물정보 데이터(building) 전처리
 #### [건물정보 데이터 결측치 비율]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/dcf31e5f-ea74-40aa-8c6a-b3caebef44ea)
 
@@ -113,3 +113,29 @@ building['냉방면적(m2)'][67] = building['연면적(m2)'][67]/1.27
 ```
 
 <br/></br>
+
+## 7. 학습 데이터(train) 전처리
+
+#### [날짜 데이터(년,월,일,시) 추가 및 평일/휴일 컬럼 추가]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/24a428ae-8388-4434-8a6d-07cfeddedf1c)
+- 기존의 날짜 정보로 부족하다는 생각이 들어 년/월/일/시로 분리
+- 평일과 휴일간의 전력사용량 차이가 클 것이라고 예상하여 휴일 변수 추가
+```
+# 평일/휴일 컬럼 만들기 - 평일과 휴일의 전력사용량 차이가 있음
+train['일시'] = pd.to_datetime(train['일시'], format = '%Y%m%d %H')
+def is_holiday(row):
+    if row['일시'].date() in [pd.to_datetime('2022-06-06').date(), pd.to_datetime('2022-08-15').date()]:
+        return 1
+    elif row['일시'].dayofweek >= 5:  # 토요일(5) 또는 일요일(6)인 경우
+        return 1
+    else:
+        return 0
+train['휴일'] = train.apply(is_holiday, axis=1)
+
+# 일시를 년, 월, 일 컬럼으로 분리(train) - 기존의 num_date_time을 사용하기 어려움
+train['년'] = train['일시'].dt.year
+train['월'] = train['일시'].dt.month
+train['일'] = train['일시'].dt.day
+train['시'] = train['일시'].dt.hour
+train.drop(['num_date_time', '일시', '년'], axis=1, inplace=True)
+```

@@ -256,10 +256,24 @@ test.drop(['ESS저장용량(kWh)', 'PCS용량(kW)', '강수량(mm)'], axis=1, in
 ```
 
 ## 9. 평가지표 생성 - SMAPE
+
+#### [SMAPE 공식]
 - 공모전에서 평가 기준이 SMAPE 값이기에 해당 값을 생성
 
-![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/443db9b8-7ba0-4821-bca9-787082c5c78c)
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/8b278062-c250-4fb1-b291-8acf9dfcccfe)
 
-- 
+- Ft(Forecast Value): t시점의 예측값
+- At(Actual Value): t시점의 실제값
+
+#### [SMAPE 특성]
+- 대칭성: SMAPE는 실제 값이 예측 값보다 크든 작든 오차를 동일하게 취급함, 이것은 MAPE에서 나타나는 문제, 즉 과소 예측의 오차가 과대 예측보다 더 크게 나타나는 문제를 해결
+- 제한된 범위: SMAPE의 값은 0%에서 200% 사이, 0%는 완벽한 예측을 나타내고, 200%는 예측이 매우 부정확할 때 나타나는 극단적인 경우를 나타냄
+
+#### [SMAPE 주의점]
+- 0 분모 문제: 실제 값과 예측 값이 모두 0인 경우, 분모가 0이 되어 계산할 수 없음, 이를 방지하기 위해 작은 상수 (epsilon)를 분모에 추가하기도 함
+- 극단값: 예측이나 실제 값 중 하나가 극단적으로 클 때, SMAPE는 해당 값의 영향을 크게 받을 수 있음
 
 
+## 10. 건물별 데이터 모델링
+
+#### [건물별 데이터 모델링 근거]

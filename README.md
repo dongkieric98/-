@@ -82,3 +82,7 @@
 
   <br/></br>
   
+## 6. 건물정보 데이터 전처리
+#### [태양광용량]
+- ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/5cf843f2-a6cd-4794-b1d2-db34555dcf26)
+

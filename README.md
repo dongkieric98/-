@@ -102,3 +102,14 @@ building['PCS용량(kW)'] = building['PCS용량(kW)'].astype('float64')
 ```
 
 #### [냉방면적 결측치 처리]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/f9db84d7-5449-49f8-9d37-c0d15daaa346)
+- 냉방면적의 경우 결측치 값이 아파트에서 3개만 존재
+- 해당 결측치를 아파트의 '연면적 : 냉방면적' (=1.27) 비율을 적용하여 냉방면적 결측치 처리
+```
+# '연면적 : 냉방면적 (=1.27)' 비율을 적용하여 냉방면적 결측치 처리
+building['냉방면적(m2)'][64] = building['연면적(m2)'][64]/1.27
+building['냉방면적(m2)'][65] = building['연면적(m2)'][65]/1.27
+building['냉방면적(m2)'][67] = building['연면적(m2)'][67]/1.27
+```
+
+<br/></br>

@@ -116,7 +116,7 @@ building['냉방면적(m2)'][67] = building['연면적(m2)'][67]/1.27
 
 ## 7. 학습 데이터(train) 전처리
 
-#### [년/월/일/시, 휴일 Feature 생성]
+#### [파생변수 생성1 - 년/월/일/시/휴일]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/24a428ae-8388-4434-8a6d-07cfeddedf1c)
 - 기존의 날짜 정보로 부족하다는 생각이 들어 년/월/일/시로 분리
 - 평일과 휴일간의 전력사용량 차이가 클 것이라고 예상하여 휴일 변수 추가
@@ -140,11 +140,41 @@ train['시'] = train['일시'].dt.hour
 train.drop(['num_date_time', '일시', '년'], axis=1, inplace=True)
 ```
 
-#### [sin time, cos time Feature 생성]
+#### [파생변수 생성2- sin time, cos time]
 - 기존의 데이터로 시간의 주기성을 파악하기 어려움
 - 시간의 주기성을 반영하는 sin time과 cos time을 추가
+- building 데이터와 train 데이터를 '건물번호' 컬럼을 기준으로 병합
 ```
 # 시간 데이터 표준화 - 시간의 주기성을 반영하기 위해 사용
 train['sin_time'] = np.sin(2*np.pi*train['시']/24)
 train['cos_time'] = np.cos(2*np.pi*train['시']/24)
+
+# 공통된 건물번호 컬럼을 기준으로 데이터 병합
+train = pd.merge(building, train, on = '건물번호')
 ```
+
+#### [날씨 데이터 결측치 처리]
+- 기상청에서 날씨 데이터에 대해 결측치 처리하는 방식(interpolate)을 적용하여 결측치 처리
+- Interpolate 함수 사용 근거: 날씨 데이터는 시간에 따라 연속적인 값을 가지는 특성이 있습니다. 예를 들어, 온도나 강수량 등의 데이터는 시간의 흐름에 따라 점진적으로 변화합니다. INTERPOLATE를 사용하면, 결측된 데이터 포인트를 인접한 데이터 포인트들을 기반으로 적절하게 추정함으로써 데이터의 연속성을 유지할 수 있습니다.
+```
+# 기상청에서 결측치 처리에 사용되는 interpolate를 이용해 결측치 처리
+train['강수량(mm)'] = train['강수량(mm)'].interpolate(method = 'linear')
+train['풍속(m/s)'] = train['풍속(m/s)'].interpolate(method = 'linear')
+train['습도(%)'] = train['습도(%)'].interpolate(method = 'linear')
+train['일조(hr)'] = train['일조(hr)'].interpolate(method = 'linear')
+train['일사(MJ/m2)'] = train['일사(MJ/m2)'].interpolate(method = 'linear')
+```
+
+####  
+
+
+
+
+
+
+
+
+
+
+
+

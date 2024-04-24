@@ -79,3 +79,187 @@
 #### [파생변수 생성]
 - 문제점: 모델의 성능을 높이기 위해 파생변수를 생성하려고 하였으나 어떤 변수를 생성해야할지에 대한 고민
 - 해결방안: 선행연구와 논문을 통해 전력사용량에 있어 생성할 수 있는 파생변수를 파악하고 현재 내가 가진 Feature로 제작할 수 있는 파생변수를 생성
+
+  <br/></br>
+  
+## 6. 건물정보 데이터(building) 전처리
+#### [건물정보 데이터 결측치 비율]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/dcf31e5f-ea74-40aa-8c6a-b3caebef44ea)
+
+#### [태양광용량, ESS저장용량, PCS저장용량 전처리]
+- 해당 결측치 값이 -로 되어있고 데이터 타입도 object여서 '-'값으 0으로 바꾸고 데이터 타입을 float64로 변경
+
+```
+# 태양광이 없는 곳이므로 0값처리
+building['태양광용량(kW)'] = building['태양광용량(kW)'].replace('-', 0)
+building['태양광용량(kW)'] = building['태양광용량(kW)'].astype('float64')
+
+# 대부분 결측치이고, 해당 기능이 없는 것이므로 0값처리
+building['ESS저장용량(kWh)'] = building['ESS저장용량(kWh)'].replace('-', 0)
+building['ESS저장용량(kWh)'] = building['ESS저장용량(kWh)'].astype('float64')
+building['PCS용량(kW)'] = building['PCS용량(kW)'].replace('-', 0)
+building['PCS용량(kW)'] = building['PCS용량(kW)'].astype('float64')
+```
+
+#### [냉방면적 결측치 처리]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/f9db84d7-5449-49f8-9d37-c0d15daaa346)
+- 냉방면적의 경우 결측치 값이 아파트에서 3개만 존재
+- 해당 결측치를 아파트의 '연면적 : 냉방면적' (=1.27) 비율을 적용하여 냉방면적 결측치 처리
+```
+# '연면적 : 냉방면적 (=1.27)' 비율을 적용하여 냉방면적 결측치 처리
+building['냉방면적(m2)'][64] = building['연면적(m2)'][64]/1.27
+building['냉방면적(m2)'][65] = building['연면적(m2)'][65]/1.27
+building['냉방면적(m2)'][67] = building['연면적(m2)'][67]/1.27
+```
+
+<br/></br>
+
+## 7. 학습 데이터(train) 전처리
+
+#### [파생변수 생성1 - 년/월/일/시/휴일]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/24a428ae-8388-4434-8a6d-07cfeddedf1c)
+- 기존의 날짜 정보로 부족하다는 생각이 들어 년/월/일/시로 분리
+- 평일과 휴일간의 전력사용량 차이가 클 것이라고 예상하여 휴일 변수 추가
+```
+# 평일/휴일 컬럼 만들기 - 평일과 휴일의 전력사용량 차이가 있음
+train['일시'] = pd.to_datetime(train['일시'], format = '%Y%m%d %H')
+def is_holiday(row):
+    if row['일시'].date() in [pd.to_datetime('2022-06-06').date(), pd.to_datetime('2022-08-15').date()]:
+        return 1
+    elif row['일시'].dayofweek >= 5:  # 토요일(5) 또는 일요일(6)인 경우
+        return 1
+    else:
+        return 0
+train['휴일'] = train.apply(is_holiday, axis=1)
+
+# 일시를 년, 월, 일 컬럼으로 분리(train) - 기존의 num_date_time을 사용하기 어려움
+train['년'] = train['일시'].dt.year
+train['월'] = train['일시'].dt.month
+train['일'] = train['일시'].dt.day
+train['시'] = train['일시'].dt.hour
+```
+
+#### [파생변수 생성2- sin time, cos time]
+- 기존의 데이터로 시간의 주기성을 파악하기 어려움
+- 시간의 주기성을 반영하는 sin time과 cos time을 추가
+- building 데이터와 train 데이터를 '건물번호' 컬럼을 기준으로 병합
+- 같은 연도이고 시간을 대체할 변수를 생성하였기에 년/일시 컬럼 삭제
+```
+# 시간 데이터 표준화 - 시간의 주기성을 반영하기 위해 사용
+train['sin_time'] = np.sin(2*np.pi*train['시']/24)
+train['cos_time'] = np.cos(2*np.pi*train['시']/24)
+
+# 공통된 건물번호 컬럼을 기준으로 데이터 병합
+train = pd.merge(building, train, on = '건물번호')
+train.drop(['num_date_time', '일시', '년'], axis=1, inplace=True)
+```
+
+#### [날씨 데이터 결측치 처리]
+- 기상청에서 날씨 데이터에 대해 결측치 처리하는 방식(interpolate)을 적용하여 결측치 처리
+- Interpolate 함수 사용 근거: 날씨 데이터는 시간에 따라 연속적인 값을 가지는 특성이 있습니다. 예를 들어, 온도나 강수량 등의 데이터는 시간의 흐름에 따라 점진적으로 변화합니다. INTERPOLATE를 사용하면, 결측된 데이터 포인트를 인접한 데이터 포인트들을 기반으로 적절하게 추정함으로써 데이터의 연속성을 유지할 수 있습니다.
+```
+# 기상청에서 결측치 처리에 사용되는 interpolate를 이용해 결측치 처리
+train['강수량(mm)'] = train['강수량(mm)'].interpolate(method = 'linear')
+train['풍속(m/s)'] = train['풍속(m/s)'].interpolate(method = 'linear')
+train['습도(%)'] = train['습도(%)'].interpolate(method = 'linear')
+train['일조(hr)'] = train['일조(hr)'].interpolate(method = 'linear')
+train['일사(MJ/m2)'] = train['일사(MJ/m2)'].interpolate(method = 'linear')
+```
+
+#### [파생변수 생성3 - 불쾌지수, 냉방효율, 체감온도]
+- 인간의 체감정보와 에너지 효율과 관련된 파생변수 추가
+- 전력 도메인에 따르면 불쾌지수와 체감온도의 경우 소비자 행동의 예측에 있어 중요한 지표이기에 사용
+- 냉방효율의 경우 냉방 시스템의 효율성을 반영하고 평가하기 위해 사용
+- 불쾌지수 = 1.8*기온 – 0.55*(1-습도/100) * (1.8*습도-26) + 32
+- 체감온도 = 13.12 + 0.6125*기온 – 11.37*풍속𝟎.𝟏𝟔+ 0.3965*풍속𝟎.𝟏𝟔*기온
+- 냉방효율 = 냉방면적 / 연면적 
+```
+# 파생변수 생성: 불쾌지수/냉방효율/체감온도
+train['불쾌지수'] = 1.8 * train['기온(C)'] -0.55 * (1-train['습도(%)']/100) * (1.8 * train['습도(%)']-26) + 32
+train['냉방효율'] = train['냉방면적(m2)'] / train['연면적(m2)']
+train['체감온도'] = 13.12 + 0.6125 * train['기온(C)'] - 11.37*(train['풍속(m/s)']**0.16) + 0.3965 * (train['풍속(m/s)']**0.16)*train['기온(C)']
+```
+
+#### [태양광용량 전처리]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/a4f85a10-566f-4518-8234-d17616f2811d)
+- 태양광용량의 경우 결측치가 64%에 해당
+- 태양광용량의 결측치 비율이 0%와 100%인 건물유형이 존재하여 해당 건물유형은 모델링 과정에서 제거하고 진행
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/8dc5d820-9eb2-4c02-b16b-8045d2aa6063)
+- 실제로 시각화를 해서 확인해본 결과 태양광용량의 유/무에 따른 전력사용량에서 유의미한 차이가 난다고 판단하여 태양광용량의 정도가 아닌 유/무로 변환하여 사용
+```
+# 태양광용량은 유무로 0과 1로 처리
+train['태양광용량(kW)'] = train['태양광용량(kW)'].apply(lambda x : 1 if x != 0 else x)
+train['태양광용량(kW)'] = train['태양광용량(kW)'].astype('int')
+```
+
+#### [불필요한 컬럼 삭제]
+- 결측치 비율이 많고 전력사용량과의 상관관계도 적으며 활용할 방법이 없는 변수를 삭제
+```
+# 필요없거나 영향 없는 컬럼 삭제
+train.drop(['ESS저장용량(kWh)', 'PCS용량(kW)', '강수량(mm)', '일조(hr)', '일사(MJ/m2)'], axis=1, inplace=True)
+```
+<br/></br>
+
+## 8. 테스트 데이터(test) 전처리
+- train 데이터와 동일한 방식으로 전처리
+```
+# 주말/공휴일 컬럼 만들기
+test['일시'] = pd.to_datetime(test['일시'], format = '%Y%m%d %H')
+def is_holiday(row):
+    if row['일시'].date() in [pd.to_datetime('2022-06-06').date(), pd.to_datetime('2022-08-15').date()]:
+        return 1
+    elif row['일시'].dayofweek >= 5:  # 토요일(5) 또는 일요일(6)인 경우
+        return 1
+    else:
+        return 0
+test['휴일'] = test.apply(is_holiday, axis=1)
+
+# 일시를 년, 월, 일 컬럼으로 분리(test)
+test['년'] = test['일시'].dt.year
+test['월'] = test['일시'].dt.month
+test['일'] = test['일시'].dt.day
+test['시'] = test['일시'].dt.hour
+
+# test 시 컬럼 전처리
+test['sin_time'] = np.sin(2*np.pi*test['시']/24)
+test['cos_time'] = np.cos(2*np.pi*test['시']/24)
+
+# 사용하지 않는 컬럼 삭제
+test.drop(['num_date_time', '일시', '년'], axis=1, inplace=True)
+
+# 공통된 건물번호 컬럼을 기준으로 데이터 병합
+test = pd.merge(building, test, on = '건물번호')
+```
+```
+# 건물유형 컬럼 처리 숫자로 변경
+test['건물유형'] = test['건물유형'].replace('건물기타', 1)
+test['건물유형'] = test['건물유형'].replace('공공', 2)
+test['건물유형'] = test['건물유형'].replace('대학교', 3)
+test['건물유형'] = test['건물유형'].replace('데이터센터', 4)
+test['건물유형'] = test['건물유형'].replace('백화점및아울렛', 5)
+test['건물유형'] = test['건물유형'].replace('병원', 6)
+test['건물유형'] = test['건물유형'].replace('상용', 7)
+test['건물유형'] = test['건물유형'].replace('아파트', 8)
+test['건물유형'] = test['건물유형'].replace('연구소', 9)
+test['건물유형'] = test['건물유형'].replace('지식산업센터', 10)
+test['건물유형'] = test['건물유형'].replace('할인마트', 11)
+test['건물유형'] = test['건물유형'].replace('호텔및리조트', 12)
+```
+```
+# 파생변수 생성: 불쾌지수/냉방효율/체감온도
+test['불쾌지수'] = 1.8 * test['기온(C)'] -0.55 * (1-test['습도(%)']/100) * (1.8 * test['습도(%)']-26) + 32
+test['냉방효율'] = test['냉방면적(m2)'] / test['연면적(m2)']
+test['체감온도'] = 13.12 + 0.6125 * test['기온(C)'] - 11.37*(test['풍속(m/s)']**0.16) + 0.3965 * (test['풍속(m/s)']**0.16) * test['기온(C)']
+
+# 필요없거나 영향 없는 컬럼 삭제
+test.drop(['ESS저장용량(kWh)', 'PCS용량(kW)', '강수량(mm)'], axis=1, inplace=True)
+```
+
+## 9. 평가지표 생성 - SMAPE
+- 공모전에서 평가 기준이 SMAPE 값이기에 해당 값을 생성
+
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/443db9b8-7ba0-4821-bca9-787082c5c78c)
+
+- 
+
+

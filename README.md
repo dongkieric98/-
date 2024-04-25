@@ -274,6 +274,215 @@ test.drop(['ESS저장용량(kWh)', 'PCS용량(kW)', '강수량(mm)'], axis=1, in
 - 극단값: 예측이나 실제 값 중 하나가 극단적으로 클 때, SMAPE는 해당 값의 영향을 크게 받을 수 있음
 
 
-## 10. 건물별 데이터 모델링
+## 10. 건물 유형별 데이터 모델링
 
-#### [건물별 데이터 모델링 근거]
+#### [건물 유형별 데이터 모델링 근거]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/3564fb4d-fc79-427c-a440-a6b414050855)
+
+1) 건물유형별 유형별과 건물번호별 모델링 중 어떤 방식으로 할까 고민하였으나 건물번호의 경우 번호별로 2040개의 데이터가 있고 건물유형은 16320개의 데이터가 존재
+2) 모델링 과정에서 건물번호별로 모델링할 경우 데이터의 학습 개수가 적다고 판단하여 건물유형별 모델링을 적용
+3) 건물유형별 전력소비량 평균값을 확인해본 결과 건물유형별로 유의미한 차이가 있다고 판단
+
+#### [모델 선정 과정]
+- 여러 모델을 사용해본 결과 Validation Score와 PLB Score 간의 차이가 많이 나는 현상을 발견
+- SMAPE 값에 대해 Validation Score가 PLB Score에 비해 높게 나타나는 현상 발생
+- 따라서 학습 데이터에 대해 Overfitting이 일어나 이를 주의하며 모델을 선정
+- 이에 따라 사용해볼 모델이 XGBOOST와 RandomForest를 사용하기로 결정
+- 각 모델 적용 후 결과를 확인하여 SMAPE값이 더 작게 나온 모델을 사용하기로 결정
+  
+#### [10-1. 건물기타 모델링]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/124ad416-4fb4-46a0-9142-f854c693a651)
+
+- HeatMap을 통해 확인한 후 전력소비량과 상관관계가 높은 변수를 사용하기로 결정
+- 사용변수: '태양광용량(kW)', '불쾌지수', '체감온도', '냉방효율', 'sin_time', 'cos_time', '휴일', '월', '일'
+- XGBOOST와 RANDOMFOREST중 XGBOOST가 더 높은 성능을 보여 해당 모델 사용
+- Parameter Tuning의 경우 아래 코드와 같이 진행
+```
+# 모델 종류 선정 및 하이퍼파라미터 설정
+model = xgb.XGBRegressor(
+     n_estimators = 500,
+     learning_rate = 0.05,
+     max_depth = 13,
+     min_child_weight = 1,
+     subsample = 0.9,
+     colsample_bytree = 0.9)
+```
+
+#### [[10-2. 건물기타 모델링]]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/37f02275-a971-41d9-b62b-f06638a78c31)
+
+- 사용변수: '태양광용량(kW)', '불쾌지수', '체감온도', '냉방효율', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용모델: XGBOOSTRegressor
+- Parameter Tuning
+```
+# 모델 종류 선정
+model = xgb.XGBRegressor(
+     n_estimators = 700,
+     learning_rate = 0.01,
+     max_depth = 15,
+     min_child_weight = 2,
+     subsample = 0.9,
+     colsample_bytree = 1.0)
+```
+
+#### [10-3. 대학교 모델링]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/afdfe00d-1781-40b7-869c-4fd74a4f72d4)
+
+- 대학교의 경우 태양광용량이 존재하지 않아 해당 변수칸이 비어있는 것을 확인할 수 있음
+- 사용변수: '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용모델: XGBOOSTRegressor
+- Parameter Tuning은 아래 코드 참고
+```
+# 모델 종류 선정
+model = xgb.XGBRegressor(
+     n_estimators = 1500,
+     learning_rate = 0.01,
+     max_depth = 13,
+     min_child_weight = 3,
+     subsample = 0.9,
+     colsample_bytree = 1.0)
+```
+
+#### [10-4. 데이터센터 모델링]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/fa5c4826-e9df-4c99-9ca0-1db9fbc93551)
+
+- 사용변수: '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용모델: RandomForestRegressor
+- Parameter Tuning은 진행하지 않음
+```
+model = RandomForestRegressor()
+```
+
+#### [10-5. 백화점및아울렛 모델링]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/e8c44f66-6b7b-4579-ba69-cabb0b299f8b)
+
+- 사용변수: '태양광용량(kW)', '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용모델: XGBOOSTRegressor
+- Parameter Tuning
+```
+# 모델 종류 선정
+model = xgb.XGBRegressor(
+     n_estimators = 1500,
+     learning_rate = 0.01,
+     max_depth = 13,
+     min_child_weight = 3,
+     subsample = 0.9,
+     colsample_bytree = 1.0)
+```
+
+#### [10-6. 병원 모델링]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/b4f45f86-67e9-4b04-a2ef-330ed4b0f2e2)
+
+- 사용변수: '태양광용량(kW)', '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용모델: XGBOOSTRegressor
+- Parameter Tuning
+```
+model = xgb.XGBRegressor(
+     n_estimators = 700,
+     learning_rate = 0.05,
+     max_depth = 19,
+     min_child_weight = 3,
+     subsample = 0.8,
+     colsample_bytree = 1.0)
+```
+
+#### [10-7. 상용 모델링]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/072bf0b0-853c-4260-ab05-94768a040c2c)
+
+- 사용변수: '태양광용량(kW)', '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용모델: XGBOOSTRegressor
+- Parameter Tuning
+```
+# 모델 종류 선정
+model = xgb.XGBRegressor(
+     n_estimators = 1500,
+     learning_rate = 0.03,
+     max_depth = 17,
+     min_child_weight = 2,
+     subsample = 1.0,
+     colsample_bytree = 1.0)
+```
+
+#### [10-8. 아파트 모델링]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/5354d4c9-987d-4909-9659-7e4b7f0e2bd3)
+
+- 사용변수: '냉방효율', 'sin_time', 'cos_time', '휴일', '월', '일', '기온(C)', '풍속(m/s)', '습도(%)'
+- 사용모델: XGBOOSTRegressor
+- Parameter Tuning
+- ```
+  # 모델 종류 선정
+model = xgb.XGBRegressor(
+     n_estimators = 700,
+     learning_rate = 0.05,
+     max_depth = 19,
+     min_child_weight = 3,
+     subsample = 0.8,
+     colsample_bytree = 1.0)
+  ```
+
+#### [10-9. 연구소 모델링]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/2c564482-55c6-44aa-881e-2b8a002cdef5)
+
+- 사용변수: '태양광용량(kW)', '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용모델: XGBOOSTRegressor
+- Parameter Tuning
+```
+# 모델 종류 선정
+model = xgb.XGBRegressor(
+     n_estimators = 700,
+     learning_rate = 0.01,
+     max_depth = 15,
+     min_child_weight = 2,
+     subsample = 0.9,
+     colsample_bytree = 1.0)
+```
+
+#### [10-10. 지식산업센터 모델링]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/740d5362-004b-43ee-87b8-26139cc26d45)
+
+- 사용변수: '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용모델: XGBOOSTRegressor
+- Parameter Tuning
+```
+# 모델 종류 선정
+model = xgb.XGBRegressor(
+     n_estimators = 700,
+     learning_rate = 0.05,
+     max_depth = 19,
+     min_child_weight = 3,
+     subsample = 0.8,
+     colsample_bytree = 1.0)
+```
+
+#### [10-11. 할인마트 모델링]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/93edb011-df5c-417f-bec3-d2bba11dfa3e)
+- 사용변수: '태양광용량(kW)', '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용모델: XGBOOSTRegressor
+- Parameter Tuning
+```
+# 모델 종류 선정
+model = xgb.XGBRegressor(
+     n_estimators = 1500,
+     learning_rate = 0.01,
+     max_depth = 13,
+     min_child_weight = 3,
+     subsample = 0.9,
+     colsample_bytree = 1.0)
+```
+
+#### [10-12. 호텔및리조트 모델링]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/ee78210d-844c-43dd-86f0-08e82eb971c3)
+
+- 사용변수: '태양광용량(kW)', '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용모델: XGBOOSTRegressor
+- Parameter Tuning
+```
+# 모델 종류 선정
+model = xgb.XGBRegressor(
+     n_estimators = 700,
+     learning_rate = 0.05,
+     max_depth = 19,
+     min_child_weight = 3,
+     subsample = 0.8,
+     colsample_bytree = 1.0)
+```

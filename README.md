@@ -344,7 +344,7 @@ test.drop(['ESS저장용량(kWh)', 'PCS용량(kW)', '강수량(mm)'], axis=1, in
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/124ad416-4fb4-46a0-9142-f854c693a651)
 
 - HeatMap을 통해 확인한 후 전력소비량과 상관관계가 높은 변수를 사용하기로 결정
-- 사용변수: '태양광용량(kW)', '불쾌지수', '체감온도', '냉방효율', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용변수: '태양광용량(kW)', '기온(C)', '풍속(m/s)', '냉방효율', 'sin_time', 'cos_time', '휴일', '월', '일'
 - XGBOOST와 RANDOMFOREST중 XGBOOST가 더 높은 성능을 보여 해당 모델 사용
 - Parameter Tuning의 경우 아래 코드와 같이 진행
 ```
@@ -361,10 +361,10 @@ model = xgb.XGBRegressor(
 <br/></br>
 <br/></br>
 
-#### [[10-2. 건물기타 모델링]]
+#### [[10-2. 공공건물 모델링]]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/37f02275-a971-41d9-b62b-f06638a78c31)
 
-- 사용변수: '태양광용량(kW)', '불쾌지수', '체감온도', '냉방효율', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용변수: '태양광용량(kW)', '불쾌지수', '체감온도', '냉방효율', 'sin_time', 'cos_time', '휴일', '월', '일', '기온(C)', '습도(%)'
 - 사용모델: XGBOOSTRegressor
 - Parameter Tuning
 ```
@@ -438,7 +438,7 @@ model = xgb.XGBRegressor(
 #### [10-6. 병원 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/b4f45f86-67e9-4b04-a2ef-330ed4b0f2e2)
 
-- 사용변수: '태양광용량(kW)', '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용변수: '태양광용량(kW)', '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일', '연면적(m2)', '냉방면적(m2)'
 - 사용모델: XGBOOSTRegressor
 - Parameter Tuning
 ```
@@ -477,7 +477,7 @@ model = xgb.XGBRegressor(
 #### [10-8. 아파트 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/5354d4c9-987d-4909-9659-7e4b7f0e2bd3)
 
-- 사용변수: '냉방효율', 'sin_time', 'cos_time', '휴일', '월', '일', '기온(C)', '풍속(m/s)', '습도(%)'
+- 사용변수: '냉방효율', 'sin_time', '체감온도', '휴일', '월', '일', '시', '기온(C)', '풍속(m/s)', '습도(%)', '불쾌지수', '연면적(m2)', '냉방면적(m2)'
 - 사용모델: XGBOOSTRegressor
 - Parameter Tuning
 ```
@@ -556,7 +556,7 @@ model = xgb.XGBRegressor(
 #### [10-12. 호텔및리조트 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/ee78210d-844c-43dd-86f0-08e82eb971c3)
 
-- 사용변수: '태양광용량(kW)', '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
+- 사용변수: '태양광용량(kW)', '불쾌지수', '냉방면적(m2)', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
 - 사용모델: XGBOOSTRegressor
 - Parameter Tuning
 ```
@@ -575,13 +575,14 @@ model = xgb.XGBRegressor(
 
 ## 11. 최종 Validation Score 및 PLB Score
 
-#### [최종 Validation Score]
+#### [건물유형별 최종 Validation Score]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/7dc2f806-7143-4f22-8254-7ab6f28579fd)
+
+#### [최종 개인 PLB Score]
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/1c017410-d23f-4e38-9152-c035f5d91153)
 
 
-<br/></br>
+#### [최종 Team PLB Score]
+- 약 1200명 중 113등
+![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/64f47261-34ba-4bbe-8114-588f4dd922bb)
 
-#### [최종 PLB Score]
-- 약 1200명 중 113등으로 상위 10% 이내
-
-<br/></br>
-<br/></br>

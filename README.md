@@ -198,6 +198,7 @@ train['태양광용량(kW)'] = train['태양광용량(kW)'].astype('int')
 # 필요없거나 영향 없는 컬럼 삭제
 train.drop(['ESS저장용량(kWh)', 'PCS용량(kW)', '강수량(mm)', '일조(hr)', '일사(MJ/m2)'], axis=1, inplace=True)
 ```
+
 <br/></br>
 
 ## 8. 테스트 데이터(test) 전처리
@@ -255,6 +256,8 @@ test['체감온도'] = 13.12 + 0.6125 * test['기온(C)'] - 11.37*(test['풍속(
 test.drop(['ESS저장용량(kWh)', 'PCS용량(kW)', '강수량(mm)'], axis=1, inplace=True)
 ```
 
+<br/></br>
+
 ## 9. 평가지표 생성 - SMAPE
 
 #### [SMAPE 공식]
@@ -273,6 +276,7 @@ test.drop(['ESS저장용량(kWh)', 'PCS용량(kW)', '강수량(mm)'], axis=1, in
 - 0 분모 문제: 실제 값과 예측 값이 모두 0인 경우, 분모가 0이 되어 계산할 수 없음, 이를 방지하기 위해 작은 상수 (epsilon)를 분모에 추가하기도 함
 - 극단값: 예측이나 실제 값 중 하나가 극단적으로 클 때, SMAPE는 해당 값의 영향을 크게 받을 수 있음
 
+<br/></br>
 
 ## 10. 건물 유형별 데이터 모델링
 
@@ -289,6 +293,9 @@ test.drop(['ESS저장용량(kWh)', 'PCS용량(kW)', '강수량(mm)'], axis=1, in
 - 따라서 학습 데이터에 대해 Overfitting이 일어나 이를 주의하며 모델을 선정
 - 이에 따라 사용해볼 모델이 XGBOOST와 RandomForest를 사용하기로 결정
 - 각 모델 적용 후 결과를 확인하여 SMAPE값이 더 작게 나온 모델을 사용하기로 결정
+ 
+<br/></br>
+
   
 #### [10-1. 건물기타 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/124ad416-4fb4-46a0-9142-f854c693a651)
@@ -308,6 +315,8 @@ model = xgb.XGBRegressor(
      colsample_bytree = 0.9)
 ```
 
+<br/></br>
+
 #### [[10-2. 건물기타 모델링]]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/37f02275-a971-41d9-b62b-f06638a78c31)
 
@@ -324,6 +333,8 @@ model = xgb.XGBRegressor(
      subsample = 0.9,
      colsample_bytree = 1.0)
 ```
+
+<br/></br>
 
 #### [10-3. 대학교 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/afdfe00d-1781-40b7-869c-4fd74a4f72d4)
@@ -343,6 +354,8 @@ model = xgb.XGBRegressor(
      colsample_bytree = 1.0)
 ```
 
+<br/></br>
+
 #### [10-4. 데이터센터 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/fa5c4826-e9df-4c99-9ca0-1db9fbc93551)
 
@@ -352,6 +365,8 @@ model = xgb.XGBRegressor(
 ```
 model = RandomForestRegressor()
 ```
+
+<br/></br>
 
 #### [10-5. 백화점및아울렛 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/e8c44f66-6b7b-4579-ba69-cabb0b299f8b)
@@ -370,6 +385,8 @@ model = xgb.XGBRegressor(
      colsample_bytree = 1.0)
 ```
 
+<br/></br>
+
 #### [10-6. 병원 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/b4f45f86-67e9-4b04-a2ef-330ed4b0f2e2)
 
@@ -385,6 +402,8 @@ model = xgb.XGBRegressor(
      subsample = 0.8,
      colsample_bytree = 1.0)
 ```
+
+<br/></br>
 
 #### [10-7. 상용 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/072bf0b0-853c-4260-ab05-94768a040c2c)
@@ -403,6 +422,8 @@ model = xgb.XGBRegressor(
      colsample_bytree = 1.0)
 ```
 
+<br/></br>
+
 #### [10-8. 아파트 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/5354d4c9-987d-4909-9659-7e4b7f0e2bd3)
 
@@ -419,6 +440,8 @@ model = xgb.XGBRegressor(
      subsample = 0.8,
      colsample_bytree = 1.0)
   ```
+
+<br/></br>
 
 #### [10-9. 연구소 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/2c564482-55c6-44aa-881e-2b8a002cdef5)
@@ -437,6 +460,8 @@ model = xgb.XGBRegressor(
      colsample_bytree = 1.0)
 ```
 
+<br/></br>
+
 #### [10-10. 지식산업센터 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/740d5362-004b-43ee-87b8-26139cc26d45)
 
@@ -454,6 +479,8 @@ model = xgb.XGBRegressor(
      colsample_bytree = 1.0)
 ```
 
+<br/></br>
+
 #### [10-11. 할인마트 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/93edb011-df5c-417f-bec3-d2bba11dfa3e)
 - 사용변수: '태양광용량(kW)', '불쾌지수', '냉방효율', '체감온도', 'sin_time', 'cos_time', '휴일', '월', '일'
@@ -469,6 +496,8 @@ model = xgb.XGBRegressor(
      subsample = 0.9,
      colsample_bytree = 1.0)
 ```
+
+<br/></br>
 
 #### [10-12. 호텔및리조트 모델링]
 ![image](https://github.com/dongkieric98/Electricity_Consumption_Forecasting_Project/assets/118495885/ee78210d-844c-43dd-86f0-08e82eb971c3)

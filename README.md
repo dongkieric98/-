@@ -569,3 +569,19 @@ model = xgb.XGBRegressor(
      subsample = 0.8,
      colsample_bytree = 1.0)
 ```
+
+<br/></br>
+<br/></br>
+
+## 11. 최종 Validation Score 및 PLB Score
+
+#### [최종 Validation Score]
+
+
+<br/></br>
+
+#### [최종 PLB Score]
+- 약 1200명 중 113등으로 상위 10% 이내
+
+<br/></br>
+<br/></br>
